@@ -5,9 +5,11 @@
 package it.polito.tdp.poweroutages;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 import it.polito.tdp.poweroutages.model.Model;
 import it.polito.tdp.poweroutages.model.Nerc;
+import it.polito.tdp.poweroutages.model.PowerOutages;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
@@ -38,7 +40,37 @@ public class FXMLController {
     
     @FXML
     void doRun(ActionEvent event) {
-    	txtResult.clear();
+    	
+    	try {
+    		Nerc nercSelezionato = this.cmbNerc.getSelectionModel().getSelectedItem();
+    		 
+    		if(nercSelezionato== null) {
+    			this.txtResult.appendText("Selezizona un NERC");
+    			return;
+    		}
+    		
+    		
+    		int numAnni = Integer.parseInt(this.txtYears.getText());
+    		if(numAnni<=0) {
+    			this.txtResult.appendText("Selziona un numero di anni maggiore di 0");
+    		}
+    		
+    		int numOre = Integer.parseInt(this.txtHours.getText());
+    		if(numOre<=0) {
+    			this.txtResult.appendText("Seleziona una un numero di ore maggiore di 0");
+    		}
+    		
+    		 
+	    	List<PowerOutages> soluzione = model.sottoinsiemeBlackout(numAnni, numOre, nercSelezionato);
+	    	for(PowerOutages p: soluzione) {
+	    		this.txtResult.appendText(""+p.toString());
+	    		}
+	    	
+    	}catch(NumberFormatException e) {
+    		this.txtResult.appendText("Inserisci valori validi");
+    	}
+    	
+    	
     }
 
     @FXML // This method is called by the FXMLLoader when initialization is complete
@@ -54,5 +86,8 @@ public class FXMLController {
     
     public void setModel(Model model) {
     	this.model = model;
+    	
+    	List<Nerc> nercList = model.getNercList();
+    	this.cmbNerc.getItems().addAll(nercList);
     }
 }
